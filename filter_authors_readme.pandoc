@@ -1,0 +1,77 @@
+=begin Usage: (for filter author)
+
+Get filter options from pandoc metadata
+get_meta_opts( 
+  +{ doc => $doc, opts => \@opts, default => \%opts, prefix => $pfx }
+);
+$doc : a data structure obtained from JSON produced by pandoc
+\@opts : an arrayref of option names, sans prefix
+\%opts : optional hashref of option defaults, keyed on option names sans prefix
+prefix : optional string prefixed to option names to get metadata keys
+          if the option name is 'foo' and the prefix is 'filter-name-'
+          then the metadata key for that option is 'filter-name-foo'.
+
+Returns a hashref with OPTION => VALUE pairs, sans prefix.
+
+Rules for finding an option value:
+1. If the metadata value is not a MetaMap or MetaList:
+   returns the value of the first Str, MetaString, Code or CodeBlock
+   found in the metadata value
+2. If the metadata value is a MetaMap:
+   returns a hashref where the keys are the keys of the MetaMap and
+   the values are obtained by recursively applying these rules to
+   the corresponding MetaMap value.
+3. If the metadata value is a MetaList:
+   Returns a plain arrayref with the values obtained from the
+   MetaList values by recursively applying these rules.
+
+   Bottom line: you get a data structure as similar to
+   your metadata YAML block, with non-list, non-map values truncated
+   as per rule 1.
+
+
+    rmap_hash { BLOCK } $doc;
+
+The BLOCK is actually a subroutine closure.
+It will be called once for each hashref in $doc,
+with $_ aliased to the hashref.  
+
+Normally the hashref represents a JSON object
+which represents an element in the pandoc AST;
+however this is not always true in the metadata section,
+so you should at least check that there is a non-false 't' key
+and a defined 'c' key in the hashref. If someone
+populates a metadata map with two such keys disaster may
+ensue, so you might want to warn against that!
+The return value of the BLOCK is ignored by most filters, 
+but Data::Rmap collects whatever is returned from the BLOCK
+and returns the collected list from rmap_hash()!
+Return an empty list/return without arguments to
+break out of BLOCK.  To not visit the contents of
+the current hashref break out of the BLOCK by calling cut();
+To alter or replace the current element alter
+the contents of $_ or assign to $_,  Just make sure
+that $_ contains a valid element object hashref!
+
+Make sure to read the documentation of Data::Rmap:
+<https://metacpan.org/pod/Data::Rmap>, especially
+the description of rmap_hash().
+
+rmap_element_lists { BLOCK } $doc;
+
+The BLOCK is actually a subroutine closure.
+It will be called once for each element in each list
+in $doc with only hashrefs as values, with $_ aliased 
+to the hashref.
+Normally the hashref represents a JSON object
+which represents an element in the pandoc AST;
+however this is not always true in the metadata section,
+so you should at least check that there is a non-false 't' key
+and a defined 'c' key in the hashref. If someone
+populates a metadata map with two such keys disaster may
+ensue, so you might want to warn against that!
+Whatever is returned from the BLOCK is pushed onto the replacement list:
+to keep the original hashref return $_
+to skip this element return an empty list/return without elements
+Only ever return an empty list or a (list of) valid element object hash(es)!
+
