@@ -43,7 +43,7 @@ Returns a hashref with OPTION =E<gt> VALUE pairs, sans prefix.
 Rules for finding an option value: 1. If the metadata value is not a
 MetaMap or MetaList:
 
-Returns the value of the first Str, MetaString, Bool, Code or CodeBlock
+Returns the value of the first Str, MetaString, Bool, Code or CodeBlock element
 found in the metadata value.
 
 =over
