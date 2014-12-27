@@ -1,9 +1,11 @@
-=begin Usage: (for filter author)
+# README for filter authors
 
-Get filter options from pandoc metadata
-get_meta_opts( 
-  +{ doc => $doc, opts => \@opts, default => \%opts, prefix => $pfx }
-);
+## Get filter options from pandoc metadata
+
+    my $opts_href = get_meta_opts( 
+        +{ doc => $doc, opts => \@opts, default => \%opts, prefix => $pfx }
+    );
+
 $doc : a data structure obtained from JSON produced by pandoc
 \@opts : an arrayref of option names, sans prefix
 \%opts : optional hashref of option defaults, keyed on option names sans prefix
