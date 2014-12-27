@@ -1,0 +1,131 @@
+=pod
+
+=encoding UTF-8
+
+=head1 README for filter authors
+
+This template makes extensive use of the L<< Data::Rmap
+module|https://metacpan.org/pod/Data::Rmap >> to iterate recursively
+through the Pandoc document data, so you should read the documentation
+of that module.
+
+=head2 Get filter options from pandoc metadata
+
+    my $opts_href = get_meta_opts( 
+        +{ doc => $doc, opts => \@opts, default => \%opts, prefix => $pfx }
+    );
+
+=over
+
+=item C<< doc => $doc >>
+
+Data structure representing a Pandoc AST decoded from JSON produced by
+pandoc. Required.
+
+=item C<< opts => \@opts >>
+
+Arrayref of option names, without prefix. Required.
+
+=item C<< default => \%opts >>
+
+Optional hashref of option defaults, keyed on option names without
+prefix. If an option is missing from the metadata it will get the
+corresponding value from this hashref.
+
+=item C<< prefix => $pfx >>
+
+optional string prefixed to option names to get metadata keys if the
+option name is 'foo' and the prefix is 'filter-name-' then the metadata
+key for that option is 'filter-name-foo', but the key in the returned
+C<< $opts_href >> will be 'foo'. This is so that you can tell which
+options are for this particular filter, but won't need to type the
+prefix when accessing elements in the options hashref.
+
+=back
+
+Returns a hashref with OPTION =E<gt> VALUE pairs, without prefix.
+
+Rules for finding an option value:
+
+=over
+
+=item 1.
+
+If the metadata value is not a MetaMap or MetaList:
+
+Returns the value of the first Str, MetaString, Bool, Code or CodeBlock
+found in the metadata value.
+
+=item 2.
+
+If the metadata value is a MetaMap:
+
+Returns a hashref where the keys are the keys of the MetaMap and the
+values are obtained by recursively applying these rules to the
+corresponding MetaMap value.
+
+=item 3.
+
+If the metadata value is a MetaList:
+
+Returns a plain arrayref with the values obtained from the MetaList
+values by recursively applying these rules.
+
+=back
+
+Bottom line: you get a data structure as similar to your metadata YAML
+block, with non-list, non-map values truncated as per rule 1. This means
+you will get strings or JSON::Boolean objects (which stringify as
+C<< 0|1 >>), possibly as values of possibly nested hash or array
+references.
+
+=head2 Iterate over each Pandoc text element in the document
+
+    rmap_hash { BLOCK } $doc;
+
+The BLOCK is actually a subroutine closure. It will be called once for
+each hashref in C<< $doc >>, with C<< $_ >> aliased to the hashref.
+
+If you want to abort processing of the current element you should
+C<< return >> without an argument; this is the equivalent of C<< next >>
+in a true loop block.
+
+If you want to replace the current element with another you should
+assign the new element to C<< $_ >>. The return value from BLOCK isn't
+very useful in our case, since Data::
+
+Normally you should first check that C<< $_ >>
+
+Normally the hashref represents a JSON object which represents an
+element in the pandoc AST; however this is not always true in the
+metadata section, so you should at least check that there is a non-false
+'t' key and a defined 'c' key in the hashref. If someone populates a
+metadata map with two such keys disaster may ensue, so you might want to
+warn against that! The return value of the BLOCK is ignored by most
+filters, but Data::Rmap collects whatever is returned from the BLOCK and
+returns the collected list from rmap_hash()! Return an empty list/return
+without arguments to break out of BLOCK. To not visit the contents of
+the current hashref break out of the BLOCK by calling cut(); To alter or
+replace the current element alter the contents of C<< $_ >> or assign to
+C<< $_ >>, Just make sure that C<< $_ >> contains a valid element object
+hashref!
+
+Make sure to read the documentation for the L<< Data::Rmap
+module|https://metacpan.org/pod/Data::Rmap >>.
+
+rmap_element_lists { BLOCK } $doc;
+
+The BLOCK is actually a subroutine closure. It will be called once for
+each element in each list in C<< $doc >> with only hashrefs as values,
+with C<< $_ >> aliased to the hashref. Normally the hashref represents a
+JSON object which represents an element in the pandoc AST; however this
+is not always true in the metadata section, so you should at least check
+that there is a non-false 't' key and a defined 'c' key in the hashref.
+If someone populates a metadata map with two such keys disaster may
+ensue, so you might want to warn against that! Whatever is returned from
+the BLOCK is pushed onto the replacement list: to keep the original
+hashref return C<< $_ >> to skip this element return an empty
+list/return without elements Only ever return an empty list or a (list
+of) valid element object hash(es)!
+
+=cut
