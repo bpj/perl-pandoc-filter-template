@@ -1,10 +1,57 @@
 # README for filter authors
 
-This template makes extensive use of the [Data::Rmap module][]
+This template makes extensive use of [the Data::Rmap module][]
 to iterate recursively through the Pandoc document data,
 so you should read the documentation of that module.
 
-[Data::Rmap module]: https://metacpan.org/pod/Data::Rmap
+It also, of course, uses [the JSON module][], so you may want to
+familiarize yourself with that.
+
+[the Data::Rmap module]: https://metacpan.org/pod/Data::Rmap
+[the JSON module]: https://metacpan.org/pod/JSON
+[the Data::Dump module]: https://metacpan.org/pod/Data::Rmap
+
+You should also familiarize yourself with pandoc's JSON output,
+not least to learn what kind of data pandoc expects a filter to return!
+
+As a Perl hacker you may be best helped by seeing 
+what the Perl data structures look like which the JSON module makes
+out of the JSON it receives from pandoc.  That's very easy if you
+use JSON::XS and have [the Data::Dump module][] installed:
+
+    $ pandoc -w json | json_xs -t dump
+    *   Some *emphatic* Markdown with `code`{#id .class attr=val}.
+    [
+      { unMeta => {} },
+      [
+        {
+          c => [
+                 [
+                   {
+                     c => [
+                            { c => "Some", t => "Str" },
+                            { c => [], t => "Space" },
+                            { c => [{ c => "emphatic", t => "Str" }], t => "Emph" },
+                            { c => [], t => "Space" },
+                            { c => "Markdown", t => "Str" },
+                            { c => [], t => "Space" },
+                            { c => "with", t => "Str" },
+                            { c => [], t => "Space" },
+                            { c => [["id", ["class"], [["attr", "val"]]], "code"], t => "Code" },
+                            { c => ".", t => "Str" },
+                          ],
+                     t => "Plain",
+                   },
+                 ],
+               ],
+          t => "BulletList",
+        },
+      ],
+    ]
+
+Do this with the kind of Markdown snippets you want to modify,
+and with the Markdown equivalents of the kind of structures you want to return,
+study them carefully, and you will soon get an idea of what the data looks like.
 
 ## Get filter options from pandoc metadata
 
@@ -39,18 +86,18 @@ Returns a hashref with OPTION => VALUE pairs, without prefix.
 
 Rules for finding an option value:
 
-1.  If the metadata value is not a MetaMap or MetaList:
+1.  If the metadata element is not a MetaMap or MetaList:
 
     Returns the value of the first Str, MetaString, MetaBool, Code or CodeBlock
-    found in the metadata value.
+    element found in the metadata value.
 
-2.  If the metadata value is a MetaMap:
+2.  If the metadata element is a MetaMap:
 
     Returns a hashref where the keys are the keys of the MetaMap and
     the values are obtained by recursively applying these rules to
     the corresponding MetaMap value.
 
-3.  If the metadata value is a MetaList:
+3.  If the metadata element is a MetaList:
 
     Returns a plain arrayref with the values obtained from the
     MetaList values by recursively applying these rules.
@@ -93,7 +140,7 @@ alter or replace the current element alter the contents of `$_` or
 assign to `$_`, Just make sure that `$_` contains a valid element
 object hashref!
 
-Make sure to read the documentation for the [Data::Rmap module](https://metacpan.org/pod/Data::Rmap). 
+Make sure to read the documentation for [the Data::Rmap module][].
 
 rmap_element_lists { BLOCK } $doc;
 
