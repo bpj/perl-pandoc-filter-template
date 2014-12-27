@@ -59,26 +59,25 @@ nested hash or array references.
 
     rmap_hash { BLOCK } $doc;
 
-The BLOCK is actually a subroutine closure.
-It will be called once for each hashref in $doc,
-with $_ aliased to the hashref.  
+The BLOCK is actually a subroutine closure. It will be called
+once for each hashref in `$doc`, with `$_` aliased to the hashref.
 
-Normally the hashref represents a JSON object
-which represents an element in the pandoc AST;
-however this is not always true in the metadata section,
-so you should at least check that there is a non-false 't' key
-and a defined 'c' key in the hashref. If someone
-populates a metadata map with two such keys disaster may
-ensue, so you might want to warn against that!
-The return value of the BLOCK is ignored by most filters, 
-but Data::Rmap collects whatever is returned from the BLOCK
-and returns the collected list from rmap_hash()!
-Return an empty list/return without arguments to
-break out of BLOCK.  To not visit the contents of
-the current hashref break out of the BLOCK by calling cut();
-To alter or replace the current element alter
-the contents of $_ or assign to $_,  Just make sure
-that $_ contains a valid element object hashref!
+Normally you should first check that `$_`
+
+Normally the hashref represents a JSON object which represents
+an element in the pandoc AST; however this is not always true in
+the metadata section, so you should at least check that there is
+a non-false 't' key and a defined 'c' key in the hashref. If
+someone populates a metadata map with two such keys disaster may
+ensue, so you might want to warn against that! The return value
+of the BLOCK is ignored by most filters, but Data::Rmap collects
+whatever is returned from the BLOCK and returns the collected
+list from rmap_hash()! Return an empty list/return without
+arguments to break out of BLOCK. To not visit the contents of
+the current hashref break out of the BLOCK by calling cut(); To
+alter or replace the current element alter the contents of `$_` or
+assign to `$_`, Just make sure that `$_` contains a valid element
+object hashref!
 
 Make sure to read the documentation of Data::Rmap:
 <https://metacpan.org/pod/Data::Rmap>, especially
@@ -88,7 +87,7 @@ rmap_element_lists { BLOCK } $doc;
 
 The BLOCK is actually a subroutine closure.
 It will be called once for each element in each list
-in $doc with only hashrefs as values, with $_ aliased 
+in `$doc` with only hashrefs as values, with `$_` aliased 
 to the hashref.
 Normally the hashref represents a JSON object
 which represents an element in the pandoc AST;
@@ -98,7 +97,7 @@ and a defined 'c' key in the hashref. If someone
 populates a metadata map with two such keys disaster may
 ensue, so you might want to warn against that!
 Whatever is returned from the BLOCK is pushed onto the replacement list:
-to keep the original hashref return $_
+to keep the original hashref return `$_`
 to skip this element return an empty list/return without elements
 Only ever return an empty list or a (list of) valid element object hash(es)!
 
