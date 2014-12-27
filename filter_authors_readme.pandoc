@@ -54,6 +54,7 @@ as per rule 1.  This means you will get strings or JSON::Boolean
 objects (which stringify as `0|1`), possibly as values of possibly
 nested hash or array references.
 
+## Iterate through each Pandoc text element in the document
 
     rmap_hash { BLOCK } $doc;
 
