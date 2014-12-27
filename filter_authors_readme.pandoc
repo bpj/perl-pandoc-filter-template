@@ -6,30 +6,53 @@
         +{ doc => $doc, opts => \@opts, default => \%opts, prefix => $pfx }
     );
 
-$doc : a data structure obtained from JSON produced by pandoc
-\@opts : an arrayref of option names, sans prefix
-\%opts : optional hashref of option defaults, keyed on option names sans prefix
-prefix : optional string prefixed to option names to get metadata keys
-          if the option name is 'foo' and the prefix is 'filter-name-'
-          then the metadata key for that option is 'filter-name-foo'.
+`doc => $doc` 
+:   Data structure representing a Pandoc AST decoded from JSON produced
+    by pandoc.
+    Required.
+
+`opts => \@opts` 
+:   Arrayref of option names, sans prefix. 
+    Required.
+
+`default => \%opts` 
+:   Optional hashref of option defaults, keyed on option names sans prefix.
+    If an option is missing from the metadata it will get the corresponding
+    value from this hashref.
+
+`prefix => $pfx`
+:   optional string prefixed to option names to get metadata keys
+    if the option name is 'foo' and the prefix is 'filter-name-'
+    then the metadata key for that option is 'filter-name-foo',
+    but the key in the returned `$opts_href` will be 'foo'.
+    This is so that you can tell which options are for this particular filter, 
+    but won't need to type the prefix when accessing elements in the
+    options hashref.
 
 Returns a hashref with OPTION => VALUE pairs, sans prefix.
 
 Rules for finding an option value:
 1. If the metadata value is not a MetaMap or MetaList:
-   returns the value of the first Str, MetaString, Code or CodeBlock
-   found in the metadata value
+
+   Returns the value of the first Str, MetaString, Bool, Code or CodeBlock
+   found in the metadata value.
+
 2. If the metadata value is a MetaMap:
-   returns a hashref where the keys are the keys of the MetaMap and
+
+   Returns a hashref where the keys are the keys of the MetaMap and
    the values are obtained by recursively applying these rules to
    the corresponding MetaMap value.
+
 3. If the metadata value is a MetaList:
+
    Returns a plain arrayref with the values obtained from the
    MetaList values by recursively applying these rules.
 
-   Bottom line: you get a data structure as similar to
-   your metadata YAML block, with non-list, non-map values truncated
-   as per rule 1.
+Bottom line: you get a data structure as similar to
+your metadata YAML block, with non-list, non-map values truncated
+as per rule 1.  This means you will get strings or JSON::Boolean
+objects (which stringify as `0|1`), possibly as values of possibly
+nested hash or array references.
 
 
     rmap_hash { BLOCK } $doc;
