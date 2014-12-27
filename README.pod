@@ -53,8 +53,8 @@ Rules for finding an option value:
 
 If the metadata value is not a MetaMap or MetaList:
 
-Returns the value of the first Str, MetaString, Bool, Code or CodeBlock
-found in the metadata value.
+Returns the value of the first Str, MetaString, MetaBool, Code or
+CodeBlock found in the metadata value.
 
 =item 2.
 
