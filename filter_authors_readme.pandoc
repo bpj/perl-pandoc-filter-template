@@ -1,5 +1,11 @@
 # README for filter authors
 
+This template makes extensive use of the [Data::Rmap module][]
+to iterate recursively through the Pandoc document data,
+so you should read the documentation of that module.
+
+[Data::Rmap module]: https://metacpan.org/pod/Data::Rmap
+
 ## Get filter options from pandoc metadata
 
     my $opts_href = get_meta_opts( 
@@ -62,6 +68,14 @@ nested hash or array references.
 The BLOCK is actually a subroutine closure. It will be called
 once for each hashref in `$doc`, with `$_` aliased to the hashref.
 
+If you want to abort processing of the current element you should
+`return` without an argument; this is the equivalent of `next` in
+a true loop block.
+
+If you want to replace the current element with another you should
+assign the new element to `$_`.  The return value from BLOCK isn't
+very useful in our case, since Data::
+
 Normally you should first check that `$_`
 
 Normally the hashref represents a JSON object which represents
@@ -79,9 +93,7 @@ alter or replace the current element alter the contents of `$_` or
 assign to `$_`, Just make sure that `$_` contains a valid element
 object hashref!
 
-Make sure to read the documentation of Data::Rmap:
-<https://metacpan.org/pod/Data::Rmap>, especially
-the description of rmap_hash().
+Make sure to read the documentation for the [Data::Rmap module](https://metacpan.org/pod/Data::Rmap). 
 
 rmap_element_lists { BLOCK } $doc;
 
